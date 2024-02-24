@@ -46,6 +46,10 @@ python imager.py -b -c -r 800x600 -p 10
 
 This command processes all images in the ./input directory and saves the processed images to the ./output directory.
 
+Super Mario original and Super Mario  
+
+<img src="data/supermario.png" alt="alt text" width="320" style="border: 1px solid black;">  
+<img src="output/supermario_b_c320x280.png" alt="alt text" width="320" style="border: 1px solid black;">  
 
 # License
 This project is open-source and available under the MIT License.
