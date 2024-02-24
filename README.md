@@ -46,10 +46,10 @@ python imager.py -b -c -r 800x600 -p 10
 
 This command processes all images in the ./input directory and saves the processed images to the ./output directory.
 
-## Contributing
-
-Contributions to improve the script or add new features are welcome. Please feel free to fork the repository and submit pull requests.
 
 # License
 This project is open-source and available under the MIT License.
 
+## Contributing
+
+Contributions to improve the script or add new features are welcome. Please feel free to fork the repository and submit pull requests.
