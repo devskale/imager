@@ -21,10 +21,9 @@ You can install the required packages using pip:
 pip install Pillow rembg
 ```
 
-# Usage
+# CLI Usage imager.py
 
-Place the images you want to process in the ./input directory.
-Run the script with desired options:
+Place the images you want to process in the ./input directory. The CLI command is intended for bulk processing. Run the script with desired options:
 
 ```sh
 python imager.py -b -c -r 800x600 -p 10
@@ -100,6 +99,14 @@ Neutral Brown Color Palette: This palette offers a rich range of brown tones, fr
 | Khaki           | #B09C8D  |
 | Champagne Pink  | #E6D7CE  |
 
+# Gradio App gradio_imager.py
+
+start the gradio app with the below command. the app can handle only one image at a time.
+```sh
+python gradio_imager.py
+```  
+
+![gradio app](/data/gradioimager2.png)
 
 # License
 This project is open-source and available under the MIT License.
