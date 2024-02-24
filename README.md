@@ -57,7 +57,7 @@ Super Mario and Fujicamera automatically converted by imager.py: bg_removed, cro
   
 ### Adding a background
 
-Let's add a blue and a green background.
+Let's add a blue and a green and blue background.
 
 ```sh
 python imager.py -b -c -r 320x280 -p 10 -bg green
@@ -65,6 +65,39 @@ python imager.py -b -c -r 320x280 -p 10 -bg green
 <img src="data/examples/batman_b_c_320x280_bg.png" alt="alt text" width="320" style="border: 1px solid white;">  
 <img src="data/examples/supermario2_b_c_320x280_bg.png" alt="alt text" width="320" style="border: 1px solid white;">  
 
+
+## Background Colors
+
+Grayscale Monochrome Color Palette: This palette consists of different shades of gray, from light to dark, creating a simple yet effective look. The hex codes are:
+
+| Color Name     | Hex Code |
+|----------------|----------|
+| Light Gray     | #D1D1D3  |
+| Lavender Gray  | #C6C6C7  |
+| Silver Foil    | #AFAFB0  |
+| Quick Silver   | #A4A4A5  |
+| Spanish Gray   | #999999  |
+
+Feminine Soft Neutrals: This palette features warm and cozy tones, such as sand, orange, and pink, creating an inviting atmosphere. The hex codes are:
+
+| Color Name    | Hex Code |
+|---------------|----------|
+| Alabaster     | #F4EEE1  |
+| Dark Vanilla  | #C4BDAC  |
+| Dust Storm    | #EBCFC4  |
+| Pale Silver   | #D3C4BE  |
+| Desert Sand   | #E9CCB1  |
+
+
+Neutral Brown Color Palette: This palette offers a rich range of brown tones, from deep and dark to light and delicate, creating a sense of stability and warmth. The hex codes are:
+
+| Color Name      | Hex Code |
+|-----------------|----------|
+| Café Noir       | #4E3829  |
+| Coffee          | #6B513E  |
+| Beaver          | #8E7766  |
+| Khaki           | #B09C8D  |
+| Champagne Pink  | #E6D7CE  |
 
 
 # License
