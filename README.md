@@ -1,4 +1,4 @@
-# Image Processing Script
+# IMAGER ___ Image Processing Script
 
 This Python script offers a versatile image processing toolkit, allowing for operations such as background removal, autocropping, resizing, and adding padding to images. It's designed to process images in bulk, making it an ideal solution for preparing images for web use or personal projects.
 
@@ -49,10 +49,11 @@ This command processes all images in the ./input directory and saves the process
 
 Super Mario and Fujicamera automatically converted by imager.py: bg_removed, cropped and skaled to 320x280.  
 
-<img src="data/examples/supermario.png" alt="alt text" width="320" style="border: 1px solid white;">  
-<img src="data/examples/supermario_b_c320x280.png" alt="alt text" width="320" style="border: 1px solid white;">  
-<img src="data/examples/depositphotos_520707962-stock-photo-fujifilm-s10-body-black-fujifilm.jpg" alt="alt text" width="320" style="border: 1px solid white;">  
-<img src="data/examples/depositphotos_520707962-stock-photo-fujifilm-s10-body-black-fujifilm_b_c320x280.png" alt="alt text" width="320" style="border: 1px solid white;">  
+<img src="data/examples/supermario.png" alt="alt text" width="200" style="border: 1px solid white;">  
+<img src="data/examples/supermario_b_c320x280.png" alt="alt text" width="200" style="border: 1px solid white;">  
+
+<img src="data/examples/depositphotos_520707962-stock-photo-fujifilm-s10-body-black-fujifilm.jpg" alt="alt text" width="200" style="border: 1px solid white;">  
+<img src="data/examples/depositphotos_520707962-stock-photo-fujifilm-s10-body-black-fujifilm_b_c320x280.png" alt="alt text" width="200" style="border: 1px solid white;">  
 
   
 ### Adding a background
@@ -62,8 +63,8 @@ Let's add a blue and a green and blue background.
 ```sh
 python imager.py -b -c -r 320x280 -p 10 -bg green
 ```
-<img src="data/examples/batman_b_c_320x280_bg.png" alt="alt text" width="320" style="border: 1px solid white;">  
-<img src="data/examples/supermario2_b_c_320x280_bg.png" alt="alt text" width="320" style="border: 1px solid white;">  
+<img src="data/examples/batman_b_c_320x280_bg.png" alt="alt text" width="200" style="border: 1px solid white;">  
+<img src="data/examples/supermario2_b_c_320x280_bg.png" alt="alt text" width="200" style="border: 1px solid white;">  
 
 
 ## Background Colors
