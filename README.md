@@ -32,11 +32,12 @@ python imager.py -b -c -r 800x600 -p 10
 
 ## Command-Line Arguments
 
--b, --background_removal: Enable background removal.
--c, --crop: Enable autocropping.
--r, --resize AxB: Resize the image to fit within AxB pixels, maintaining aspect ratio.
--p, --padding PIXELS: Add PIXELS number of padding around the image. The final image size stays as specified in -r AxB.
-Example
+- `-b, --background_removal`: Enable background removal.
+- `-c, --crop`: Enable autocropping.
+- `-r, --resize AxB`: Resize the image to fit within AxB pixels, maintaining aspect ratio.
+- `-p, --padding PIXELS`: Add PIXELS number of padding around the image. The final image size stays as specified in `-r AxB`.
+
+## Example
 To process images by removing the background, autocropping, resizing to 800x600 pixels, and adding 10 pixels of padding:
 
 ```sh
