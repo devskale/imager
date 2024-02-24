@@ -48,8 +48,8 @@ This command processes all images in the ./input directory and saves the process
 
 Super Mario original and Super Mario  
 
-<img src="data/supermario.png" alt="alt text" width="320" style="border: 1px solid black;">  
-<img src="output/supermario_b_c320x280.png" alt="alt text" width="320" style="border: 1px solid black;">  
+<img src="data/supermario.png" alt="alt text" width="320" style="border: 1px solid white;">  
+<img src="output/supermario_b_c320x280.png" alt="alt text" width="320" style="border: 1px solid white;">  
 
 # License
 This project is open-source and available under the MIT License.
