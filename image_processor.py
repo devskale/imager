@@ -2,7 +2,7 @@ import argparse
 import os
 import shutil
 from rembg import remove
-from PIL import Image, ImageOps
+from PIL import Image
 
 
 def add_background(image_path, background, output_path):
@@ -77,9 +77,9 @@ def process_image(input_path, output_path, crop=False, remove_bg=False, resize=N
         autocrop_image(temp_path, temp_path)
 
     if resize:
-        adjusted_resize = (resize[0] - 2*padding,
-                           resize[1] - 2*padding) if padding else resize
-        resize_and_pad_image(temp_path, temp_path, adjusted_resize, padding)
+        #        adjusted_resize = (resize[0],
+        #                           resize[1]) if padding else resize
+        resize_and_pad_image(temp_path, temp_path, resize, padding)
 
     if background:
         add_background(temp_path, background, temp_path)
@@ -109,6 +109,8 @@ def resize_and_pad_image(image_path, output_path, dimensions, padding=0):
                       Image.Resampling.LANCZOS)
 
         # Create a new image with the target dimensions and a transparent background
+        # new image shall include padding spacig
+
         new_img = Image.new("RGBA", dimensions, (255, 255, 255, 0))
 
         # Calculate the position to paste the resized image to center it
@@ -119,6 +121,37 @@ def resize_and_pad_image(image_path, output_path, dimensions, padding=0):
         new_img.paste(img, paste_position, img if img.mode == 'RGBA' else None)
 
         # Save the output
+        new_img.save(output_path, format='PNG')
+
+
+def resize_and_pad_image2(image_path, output_path, resize_dimensions, padding):
+    """
+    Resizes an image to the given dimensions and adds padding around it.
+
+    Args:
+    - image_path (str): Path to the input image.
+    - output_path (str): Path where the resized and padded image should be saved.
+    - resize_dimensions (tuple): Target dimensions (width, height) for resizing the image.
+    - padding (int): Padding to add around the resized image.
+    """
+    # Open the original image
+    with Image.open(image_path) as img:
+        # Resize the image to the specified dimensions
+        img = img.resize(resize_dimensions, Image.Resampling.LANCZOS)
+
+        # Create a new image with padding added to the dimensions
+        new_width = resize_dimensions[0] + 2*padding
+        new_height = resize_dimensions[1] + 2*padding
+        # Assuming a transparent padding for simplicity
+        new_img = Image.new(
+            "RGBA", (new_width, new_height), (255, 255, 255, 0))
+
+        # Paste the resized image onto the new image, centered
+        # Starting top-left position to paste the resized image
+        paste_position = (padding, padding)
+        new_img.paste(img, paste_position)
+
+        # Save the output image
         new_img.save(output_path, format='PNG')
 
 
@@ -154,6 +187,34 @@ def generate_output_filename(input_path, remove_bg=False, crop=False, resize=Non
     # Ensure the file saves as PNG, accommodating for transparency or added backgrounds
     return f"{base}{suffix}.png"
 
+
+def generate_output_filename2(input_path, remove_bg=False, crop=False, resize=None, padding=0, background=None):
+    """
+    Generates an output filename based on the input path and processing options applied.
+    Takes into account the effect of padding on the final image size for naming.
+    """
+    base, _ = os.path.splitext(os.path.basename(input_path))
+    suffix = ""
+
+    if remove_bg:
+        suffix += "_b"
+    if crop:
+        suffix += "_c"
+    if resize:
+        # Adjust the resize dimensions to reflect the final image size after padding
+        if padding > 0:
+            # Adjust dimensions to reflect content size before padding if that's the intent
+            # Otherwise, add padding to the dimensions to reflect final size including padding
+            adjusted_width = resize[0] + 2*padding
+            adjusted_height = resize[1] + 2*padding
+            suffix += f"_{adjusted_width}x{adjusted_height}"
+        else:
+            width, height = resize
+            suffix += f"_{width}x{height}"
+    if background:
+        suffix += "_bg"
+
+    return f"{base}{suffix}.png"
 
 # The main and process_images functions remain the same, but ensure to update them to handle the new PNG output correctly.
 
