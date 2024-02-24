@@ -106,7 +106,7 @@ start the gradio app with the below command. the app can handle only one image a
 python gradio_imager.py
 ```  
 
-![gradio app](/data/gradioimager2.png)
+![gradio app](data/gradioimager2.png)
 
 # License
 This project is open-source and available under the MIT License.
