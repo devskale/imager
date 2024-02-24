@@ -5,23 +5,35 @@ from rembg import remove
 from PIL import Image
 
 
-def add_background(image_path, background, output_path):
+def add_background(image_path, background, output_path, default_color="#FFFFFF"):
     """
-    Adds a background to an image. The background can be a solid color or an image.
+    Adds a background to an image, with a fallback to a default color if the specified color is not available.
 
     Args:
     - image_path (str): Path to the input image with transparent background.
     - background (str): Background color (as a name or hex code) or path to a background image file.
     - output_path (str): Path where the image with the new background should be saved.
+    - default_color (str): Fallback color if the specified background color is not valid. Defaults to white.
     """
     with Image.open(image_path).convert("RGBA") as foreground:
-        # If background is a hex code or color name
-        if background.startswith("#") or background.isalpha():
-            background_layer = Image.new("RGBA", foreground.size, background)
-        else:  # If background is an image file
-            with Image.open(background).convert("RGBA") as bg_img:
-                bg_img = bg_img.resize(foreground.size)
-                background_layer = bg_img
+        try:
+            # Attempt to create a background layer with the specified color or image
+            if background.startswith("#") or background.isalpha():
+                # Check if the color name is valid by creating a small test image
+                Image.new("RGBA", (1, 1), background)
+                background_layer = Image.new(
+                    "RGBA", foreground.size, background)
+            else:
+                # If background is an image file
+                with Image.open(background).convert("RGBA") as bg_img:
+                    bg_img = bg_img.resize(foreground.size)
+                    background_layer = bg_img
+        except ValueError:
+            # If the color is invalid, use the default color
+            print(
+                f"Invalid color '{background}'. Using default color '{default_color}'.")
+            background_layer = Image.new(
+                "RGBA", foreground.size, default_color)
 
         # Composite the foreground over the background
         with Image.alpha_composite(background_layer, foreground) as final_img:
@@ -121,37 +133,6 @@ def resize_and_pad_image(image_path, output_path, dimensions, padding=0):
         new_img.paste(img, paste_position, img if img.mode == 'RGBA' else None)
 
         # Save the output
-        new_img.save(output_path, format='PNG')
-
-
-def resize_and_pad_image2(image_path, output_path, resize_dimensions, padding):
-    """
-    Resizes an image to the given dimensions and adds padding around it.
-
-    Args:
-    - image_path (str): Path to the input image.
-    - output_path (str): Path where the resized and padded image should be saved.
-    - resize_dimensions (tuple): Target dimensions (width, height) for resizing the image.
-    - padding (int): Padding to add around the resized image.
-    """
-    # Open the original image
-    with Image.open(image_path) as img:
-        # Resize the image to the specified dimensions
-        img = img.resize(resize_dimensions, Image.Resampling.LANCZOS)
-
-        # Create a new image with padding added to the dimensions
-        new_width = resize_dimensions[0] + 2*padding
-        new_height = resize_dimensions[1] + 2*padding
-        # Assuming a transparent padding for simplicity
-        new_img = Image.new(
-            "RGBA", (new_width, new_height), (255, 255, 255, 0))
-
-        # Paste the resized image onto the new image, centered
-        # Starting top-left position to paste the resized image
-        paste_position = (padding, padding)
-        new_img.paste(img, paste_position)
-
-        # Save the output image
         new_img.save(output_path, format='PNG')
 
 
