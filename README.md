@@ -41,15 +41,17 @@ python imager.py -b -c -r 800x600 -p 10
 To process images by removing the background, autocropping, resizing to 800x600 pixels, and adding 10 pixels of padding:
 
 ```sh
-python imager.py -b -c -r 800x600 -p 10
+python imager.py -b -c -r 320x280 -p 10
 ```
 
 This command processes all images in the ./input directory and saves the processed images to the ./output directory.
 
-Super Mario original and Super Mario  
+Super Mario and Fujicamera automatically converted by imager.py: bg_removed, cropped and skaled to 320x280.  
 
 <img src="data/supermario.png" alt="alt text" width="320" style="border: 1px solid white;">  
 <img src="output/supermario_b_c320x280.png" alt="alt text" width="320" style="border: 1px solid white;">  
+<img src="data/examples/depositphotos_520707962-stock-photo-fujifilm-s10-body-black-fujifilm.jpg" alt="alt text" width="320" style="border: 1px solid white;">  
+<img src="data/examples/depositphotos_520707962-stock-photo-fujifilm-s10-body-black-fujifilm_b_c320x280.png" alt="alt text" width="320" style="border: 1px solid white;">  
 
 # License
 This project is open-source and available under the MIT License.
