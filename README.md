@@ -36,6 +36,7 @@ python imager.py -b -c -r 800x600 -p 10
 - `-c, --crop`: Enable autocropping.
 - `-r, --resize AxB`: Resize the image to fit within AxB pixels, maintaining aspect ratio.
 - `-p, --padding PIXELS`: Add PIXELS number of padding around the image. The final image size stays as specified in `-r AxB`.
+- `-bg, --background BACKGROUND`: Add a background to the image. Accepts color names, hex codes, or paths to image files.
 
 ## Example
 To process images by removing the background, autocropping, resizing to 800x600 pixels, and adding 10 pixels of padding:
@@ -52,6 +53,19 @@ Super Mario and Fujicamera automatically converted by imager.py: bg_removed, cro
 <img src="data/examples/supermario_b_c320x280.png" alt="alt text" width="320" style="border: 1px solid white;">  
 <img src="data/examples/depositphotos_520707962-stock-photo-fujifilm-s10-body-black-fujifilm.jpg" alt="alt text" width="320" style="border: 1px solid white;">  
 <img src="data/examples/depositphotos_520707962-stock-photo-fujifilm-s10-body-black-fujifilm_b_c320x280.png" alt="alt text" width="320" style="border: 1px solid white;">  
+
+  
+### Adding a background
+
+Let's add a blue and a green background.
+
+```sh
+python imager.py -b -c -r 320x280 -p 10 -bg green
+```
+<img src="data/examples/batman_b_c_320x280_bg.png" alt="alt text" width="320" style="border: 1px solid white;">  
+<img src="data/examples/supermario2_b_c_320x280_bg.png" alt="alt text" width="320" style="border: 1px solid white;">  
+
+
 
 # License
 This project is open-source and available under the MIT License.

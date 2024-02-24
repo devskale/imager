@@ -5,6 +5,31 @@ from rembg import remove
 from PIL import Image, ImageOps
 
 
+def add_background(image_path, background, output_path):
+    """
+    Adds a background to an image. The background can be a solid color or an image.
+
+    Args:
+    - image_path (str): Path to the input image with transparent background.
+    - background (str): Background color (as a name or hex code) or path to a background image file.
+    - output_path (str): Path where the image with the new background should be saved.
+    """
+    with Image.open(image_path).convert("RGBA") as foreground:
+        # If background is a hex code or color name
+        if background.startswith("#") or background.isalpha():
+            background_layer = Image.new("RGBA", foreground.size, background)
+        else:  # If background is an image file
+            with Image.open(background).convert("RGBA") as bg_img:
+                bg_img = bg_img.resize(foreground.size)
+                background_layer = bg_img
+
+        # Composite the foreground over the background
+        with Image.alpha_composite(background_layer, foreground) as final_img:
+            # Convert to RGB to save in formats other than PNG
+            final_img = final_img.convert("RGB")
+            final_img.save(output_path)
+
+
 def autocrop_image(image_path, output_path):
     """
     Autocrops an image, focusing on the non-transparent pixels and saves as PNG.
@@ -22,7 +47,7 @@ def autocrop_image(image_path, output_path):
             image.save(output_path, format='PNG')
 
 
-def process_image(input_path, output_path, crop=False, remove_bg=False, resize=None, padding=0):
+def process_image(input_path, output_path, crop=False, remove_bg=False, resize=None, padding=0, background=None):
     """
     Processes a single image based on the provided options and saves it.
 
@@ -33,49 +58,34 @@ def process_image(input_path, output_path, crop=False, remove_bg=False, resize=N
     - remove_bg (bool): Whether to remove the background of the image.
     - resize (tuple): Optional dimensions (width, height) to resize the image.
     - padding (int): Number of padding pixels to add around the image.
+    - background (str): Optional background color (hex code or name) or path to an image file to set as the background.
     """
-    need_processing = crop or resize or remove_bg
-    # Define temp_path for all processing scenarios
+    need_processing = crop or resize or remove_bg or background
     temp_path = output_path + ".tmp.png"
 
-    with open(input_path, 'rb') as input_file:
-        image_data = input_file.read()
-
-    # Ensure any processing writes initially to a temporary file
-    if need_processing or padding:
-        if remove_bg:
-            image_data = remove(image_data)
-            # Write post-background removal image data to temp_path
-            with open(temp_path, 'wb') as temp_file:
-                temp_file.write(image_data)
-        else:
-            # Copy original image to temp_path if no background removal
-            with open(temp_path, 'wb') as temp_file:
-                temp_file.write(image_data)
+    if remove_bg:
+        with open(input_path, 'rb') as input_file:
+            image_data = input_file.read()
+        image_data = remove(image_data)
+        with open(temp_path, 'wb') as temp_file:
+            temp_file.write(image_data)
+    else:
+        # Copy original image to temp_path if no background removal
+        shutil.copy(input_path, temp_path)
 
     if crop:
         autocrop_image(temp_path, temp_path)
 
     if resize:
-        # Adjust for padding only if resize is specified
         adjusted_resize = (resize[0] - 2*padding,
                            resize[1] - 2*padding) if padding else resize
-        resize_and_pad_image(temp_path, output_path, adjusted_resize, padding)
-        os.remove(temp_path)  # Cleanup after resizing
-    elif crop:
-        # Finalize cropping without resizing; handle padding if specified
-        if padding > 0:
-            resize_and_pad_image(
-                temp_path, output_path, (crop_width - 2*padding, crop_height - 2*padding), padding)
-            os.remove(temp_path)  # Cleanup after padding is added
-        else:
-            os.rename(temp_path, output_path)
-    elif need_processing:
-        # If there was any processing but not crop or resize specifically, finalize it
-        os.rename(temp_path, output_path)
-    else:
-        # Directly copy the original image to output if no processing and no padding
-        shutil.copy(input_path, output_path)
+        resize_and_pad_image(temp_path, temp_path, adjusted_resize, padding)
+
+    if background:
+        add_background(temp_path, background, temp_path)
+
+    # Finalize the process: move from temp_path to output_path
+    os.rename(temp_path, output_path)
 
 
 def resize_and_pad_image(image_path, output_path, dimensions, padding=0):
@@ -112,17 +122,18 @@ def resize_and_pad_image(image_path, output_path, dimensions, padding=0):
         new_img.save(output_path, format='PNG')
 
 
-def generate_output_filename(input_path, remove_bg=False, crop=False, resize=None):
+def generate_output_filename(input_path, remove_bg=False, crop=False, resize=None, background=None):
     """
-    Generates an output filename based on the input path. Appends '_b', '_c', '_bcr', or '_c[WIDTH]x[HEIGHT]' 
-    before the file extension and ensures the extension is '.png' for images with background removal, cropping, 
-    or resizing.
+    Generates an output filename based on the input path and processing options applied.
+    Appends specific suffixes based on the operations: '_b' for background removal, '_c' for crop,
+    and '_bg' if a background is added. It ensures the file extension is '.png'.
 
     Args:
     - input_path (str): Path to the input image.
     - remove_bg (bool): Indicates if background removal was applied.
     - crop (bool): Indicates if autocrop was applied.
-    - resize (tuple): Optional dimensions (width, height) to resize the image, affects the filename if cropping is applied.
+    - resize (tuple): Optional dimensions (width, height) for resizing the image.
+    - background (str): Indicates if a background was added (None if not used).
 
     Returns:
     - (str): Modified filename with appropriate suffix and '.png' extension.
@@ -134,14 +145,13 @@ def generate_output_filename(input_path, remove_bg=False, crop=False, resize=Non
         suffix += "_b"
     if crop:
         suffix += "_c"
-    if resize and crop:  # Only modify the filename for resize if cropping is also applied
+    if resize:
         width, height = resize
-        suffix += f"{width}x{height}"
+        suffix += f"_{width}x{height}"
+    if background:
+        suffix += "_bg"  # Append "_bg" if the background option was used
 
-    # If there's no specific processing applied, keep the original filename but ensure it saves as PNG
-    if not (remove_bg or crop or resize):
-        suffix = ""
-
+    # Ensure the file saves as PNG, accommodating for transparency or added backgrounds
     return f"{base}{suffix}.png"
 
 
@@ -151,7 +161,7 @@ def generate_output_filename(input_path, remove_bg=False, crop=False, resize=Non
 # Ensure to pass the crop argument to process_image and adjust the output filename generation accordingly
 
 
-def process_images(input_dir="./input", output_dir="./output", crop=False, remove_bg=False, resize=None, padding=0):
+def process_images(input_dir="./input", output_dir="./output", crop=False, remove_bg=False, resize=None, padding=0, background=None):
     """
     Processes images in the specified directory based on the provided options.
 
@@ -161,6 +171,8 @@ def process_images(input_dir="./input", output_dir="./output", crop=False, remov
     - crop (bool): Whether to crop the images.
     - remove_bg (bool): Whether to remove the background of the images.
     - resize (tuple): Optional dimensions (width, height) to resize the image.
+    - padding (int): Number of padding pixels to add around the image.
+    - background (str): Optional background color (hex code or name) or path to an image file to set as the background.
     """
     processed_input_dir = os.path.join(input_dir, "processed")
     os.makedirs(processed_input_dir, exist_ok=True)
@@ -177,11 +189,14 @@ def process_images(input_dir="./input", output_dir="./output", crop=False, remov
     for i, input_path in enumerate(inputs, start=1):
         filename = os.path.basename(input_path)
         output_filename = generate_output_filename(
-            input_path, remove_bg=remove_bg, crop=crop, resize=resize)
+            input_path, remove_bg=remove_bg, crop=crop, resize=resize, background=background)
         output_path = os.path.join(output_dir, output_filename)
         print(f"Processing image {i}/{len(inputs)}...{filename}")
-        process_image(input_path, output_path, crop=crop,
-                      remove_bg=remove_bg, resize=resize, padding=padding)  # Pass padding here
+
+        # Update the call to process_image with all parameters including background
+        process_image(input_path, output_path, crop=crop, remove_bg=remove_bg,
+                      resize=resize, padding=padding, background=background)
+
         shutil.move(input_path, os.path.join(processed_input_dir, filename))
 
     print("All images have been processed.")
@@ -189,7 +204,7 @@ def process_images(input_dir="./input", output_dir="./output", crop=False, remov
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Image processing script with options for cropping, background removal, and resizing.")
+        description="Image processing script with options for cropping, background removal, resizing, and adding a background.")
     parser.add_argument("-c", "--crop", action="store_true",
                         help="Crop the images.")
     parser.add_argument("-b", "--background_removal", action="store_true",
@@ -197,27 +212,28 @@ def main():
     parser.add_argument("-r", "--resize", type=str,
                         help="Resize the image to fit within AxB pixels while maintaining aspect ratio. Format: 'AxB'")
     parser.add_argument("-p", "--padding", type=int, default=0,
-                        help="Number of padding pixels to add around the image. The image size stays the same as specified in -c AxB.")
+                        help="Number of padding pixels to add around the image.")
+    parser.add_argument("-bg", "--background", type=str, default=None,
+                        help="Add a background to the image. Accepts color names, hex codes, or paths to image files.")
 
     args = parser.parse_args()
 
-    # Extract resize dimensions and padding
+    resize_dimensions = None
     if args.resize:
         try:
             width, height = map(int, args.resize.split('x'))
             resize_dimensions = (width, height)
         except ValueError:
-            raise ValueError(
-                "Invalid format for resize dimensions. Please use 'AxB'.")
-    else:
-        resize_dimensions = None
+            print("Invalid format for resize dimensions. Please use 'AxB'.")
+            return
 
-    # Now include padding in the process_images call
+    # Assuming you have a function that processes images in a directory
     process_images(
         crop=args.crop,
         remove_bg=args.background_removal,
         resize=resize_dimensions,
-        padding=args.padding  # Include padding here
+        padding=args.padding,
+        background=args.background
     )
 
 
