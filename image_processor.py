@@ -205,7 +205,7 @@ def generate_output_filename(input_path, remove_bg=False, crop=False, resize=Non
 # Ensure to pass the crop argument to process_image and adjust the output filename generation accordingly
 
 
-def process_images(input_dir="./input", output_dir="./output", crop=False, remove_bg=False, resize=None, padding=0, background=None):
+def process_images2(input_dir="./input", output_dir="./output", crop=False, remove_bg=False, resize=None, padding=0, background=None):
     """
     Processes images in the specified directory based on the provided options.
 
@@ -242,5 +242,50 @@ def process_images(input_dir="./input", output_dir="./output", crop=False, remov
                       resize=resize, padding=padding, background=background)
 
         shutil.move(input_path, os.path.join(processed_input_dir, filename))
+
+    print("All images have been processed.")
+
+
+def process_images(input_dir="./input", output_dir="./output", crop=False, remove_bg=False, resize=None, padding=0, background=None):
+    """
+    Processes images in the specified directory based on the provided options.
+    """
+    processed_input_dir = os.path.join(input_dir, "processed")
+    os.makedirs(processed_input_dir, exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
+
+    inputs = [os.path.join(input_dir, f) for f in os.listdir(
+        input_dir) if os.path.isfile(os.path.join(input_dir, f))]
+
+    if not inputs:
+        print("No images found in the input directory.")
+        return
+
+    for i, input_path in enumerate(inputs, start=1):
+        try:
+            with Image.open(input_path) as img:
+                # Define filename here, before it's used
+                filename = os.path.basename(input_path)
+
+                # Process the image
+                processed_img = process_image(
+                    img, crop=crop, remove_bg=remove_bg, resize=resize, padding=padding, background=background)
+
+                # Generate output filename based on processing parameters
+                output_filename = generate_output_filename(
+                    filename, remove_bg=remove_bg, crop=crop, resize=resize, background=background)
+                output_path = os.path.join(output_dir, output_filename)
+
+                # Save the processed image to the output directory
+                processed_img.save(output_path)
+
+                print(
+                    f"Processed image {i}/{len(inputs)}: {filename} -> {output_filename}")
+
+                # Optionally move the processed input image to a "processed" subdirectory
+                shutil.move(input_path, os.path.join(
+                    processed_input_dir, filename))
+        except Exception as e:
+            print(f"Error processing image {input_path}: {e}")
 
     print("All images have been processed.")
