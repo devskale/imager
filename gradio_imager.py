@@ -47,12 +47,12 @@ interface = gr.Interface(fn=gradio_interface,
                              gr.components.Textbox(
                                  label="Resize (WxH)", placeholder="Example: 100x100"),
                              gr.components.Slider(
-                                 minimum=0, maximum=200, label="Padding", default=0),
+                                 minimum=0, maximum=200, label="Padding"),
                              gr.components.Textbox(
                                  label="Background", placeholder="Color name or hex code")
                          ],
                          outputs=gr.components.Image(type="pil"),
-                         title="Image Processor",
+                         title="IMAGER ___ Image Processor",
                          description="Upload an image and select processing options.")
 
 

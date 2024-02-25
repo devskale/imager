@@ -2,6 +2,8 @@
 
 This Python script offers a versatile image processing toolkit, allowing for operations such as background removal, autocropping, resizing, and adding padding to images. It's designed to process images in bulk, making it an ideal solution for preparing images for web use or personal projects.
 
+[Imager Gradio App](https://huggingface.co/spaces/woodmastr/imager)
+
 ## Features
 
 - **Background Removal**: Automatically removes the background from images.
