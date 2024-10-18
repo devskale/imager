@@ -1,5 +1,8 @@
 name: Sync to Hugging Face hub
 
+git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"
+git config --global filter.lfs.process "git-lfs filter-process --skip"
+
 on:
   push:
     branches: [main]
