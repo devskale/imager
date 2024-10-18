@@ -15,18 +15,11 @@ jobs:
           fetch-depth: 0
           lfs: true
 
-      - name: Configure Git
+      - name: Setup Git LFS
         run: |
+          git lfs install
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
-          git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"
-          git config --global filter.lfs.process "git-lfs filter-process --skip"
-
-      - name: Clean LFS files
-        run: |
-          git lfs uninstall
-          git config --remove-section filter.lfs || true
-          git lfs ls-files | cut -d' ' -f3 | xargs -r git rm --cached
 
       - name: Fetch from Hugging Face
         env:
@@ -40,10 +33,18 @@ jobs:
           git merge huggingface/main --allow-unrelated-histories -X ours || true
           git status
 
-      - name: Commit merged changes
+      - name: Track binary files with Git LFS
         run: |
-          git add .
-          git commit -m "Merge changes from Hugging Face" || echo "No changes to commit"
+          git lfs track "*.png"
+          git add .gitattributes
+          git add "*.png"
+          git commit -m "Track binary files with Git LFS" || echo "No changes to commit"
+
+      - name: Push LFS objects to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git lfs push --all https://woodmastr:$HF_TOKEN@huggingface.co/spaces/woodmastr/imager main
 
       - name: Push to Hugging Face
         env:
