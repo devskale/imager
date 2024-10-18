@@ -23,16 +23,28 @@ jobs:
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
 
-      - name: Fetch from Hugging Face
+      - name: Setup Hugging Face remote
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          git remote set-url space https://woodmastr:$HF_TOKEN@huggingface.co/spaces/woodmastr/imager
-          git fetch space
+          if ! git remote | grep -q 'space'; then
+            git remote add space https://woodmastr:$HF_TOKEN@huggingface.co/spaces/woodmastr/imager
+          else
+            git remote set-url space https://woodmastr:$HF_TOKEN@huggingface.co/spaces/woodmastr/imager
+          fi
+
+      - name: Fetch from Hugging Face
+        run: git fetch space
 
       - name: Merge Hugging Face changes
         run: |
-          git merge space/main --allow-unrelated-histories -X theirs
+          git merge space/main --allow-unrelated-histories -X theirs || true
+          git status
+
+      - name: Commit merged changes
+        run: |
+          git add .
+          git commit -m "Merge changes from Hugging Face" || echo "No changes to commit"
 
       - name: Push to GitHub
         run: git push origin main
