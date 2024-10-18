@@ -1,35 +1,55 @@
 name: Sync to Hugging Face hub
 
-git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"
-git config --global filter.lfs.process "git-lfs filter-process --skip"
-
 on:
   push:
     branches: [main]
-  # to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
   sync-to-hub:
     runs-on: ubuntu-latest
     steps:
-      # Checkout the repository
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history so we can rebase if necessary
-          lfs: true       # Enable Git LFS if used
+          fetch-depth: 0
+          lfs: true
 
-      # Pull changes from Hugging Face before pushing
-      - name: Pull from Hugging Face hub
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"
+          git config --global filter.lfs.process "git-lfs filter-process --skip"
+
+      - name: Clean LFS files
+        run: |
+          git lfs uninstall
+          git config --remove-section filter.lfs || true
+          git lfs ls-files | cut -d' ' -f3 | xargs -r git rm --cached
+
+      - name: Fetch from Hugging Face
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           git remote add huggingface https://woodmastr:$HF_TOKEN@huggingface.co/spaces/woodmastr/imager
-          git pull huggingface main --rebase  # Pull and rebase any changes from the Hugging Face repo
+          git fetch huggingface main
 
-      # Push the changes to Hugging Face
-      - name: Push to Hugging Face hub
+      - name: Merge Hugging Face changes
+        run: |
+          git merge huggingface/main --allow-unrelated-histories -X ours || true
+          git status
+
+      - name: Commit merged changes
+        run: |
+          git add .
+          git commit -m "Merge changes from Hugging Face" || echo "No changes to commit"
+
+      - name: Push to Hugging Face
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           git push https://woodmastr:$HF_TOKEN@huggingface.co/spaces/woodmastr/imager main
+
+      - name: Push to GitHub
+        run: git push origin main
