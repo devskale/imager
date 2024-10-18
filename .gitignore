@@ -3,3 +3,5 @@ input/
 .DS_Store
 __pycache__/
 flagged/
+venv/
+.venv/
