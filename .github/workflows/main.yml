@@ -14,6 +14,7 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Setup Git LFS
         run: git lfs install
@@ -47,4 +48,7 @@ jobs:
           git commit -m "Merge changes from Hugging Face" || echo "No changes to commit"
 
       - name: Push to GitHub
-        run: git push origin main
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          git push https://$PAT_TOKEN@github.com/devskale/imager.git main
