@@ -1,4 +1,5 @@
 name: Sync to Hugging Face hub
+
 on:
   push:
     branches: [main]
@@ -9,11 +10,23 @@ jobs:
   sync-to-hub:
     runs-on: ubuntu-latest
     steps:
+      # Checkout the repository
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          lfs: true
-      - name: Push to hub
+          fetch-depth: 0  # Fetch all history so we can rebase if necessary
+          lfs: true       # Enable Git LFS if used
+
+      # Pull changes from Hugging Face before pushing
+      - name: Pull from Hugging Face hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: git push https://woodmastr:$HF_TOKEN@huggingface.co/spaces/woodmastr/imager main
+        run: |
+          git remote add huggingface https://woodmastr:$HF_TOKEN@huggingface.co/spaces/woodmastr/imager
+          git pull huggingface main --rebase  # Pull and rebase any changes from the Hugging Face repo
+
+      # Push the changes to Hugging Face
+      - name: Push to Hugging Face hub
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git push https://woodmastr:$HF_TOKEN@huggingface.co/spaces/woodmastr/imager main
