@@ -1,23 +1,25 @@
-name: Sync to Hugging Face hub
+name: Sync from Hugging Face to GitHub
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'  # Runs every 6 hours
+  workflow_dispatch:  # Allows manual triggering
 
 jobs:
-  sync-to-hub:
+  sync-to-github:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout GitHub repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           lfs: true
 
       - name: Setup Git LFS
+        run: git lfs install
+
+      - name: Configure Git
         run: |
-          git lfs install
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
 
@@ -25,32 +27,12 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          git remote add huggingface https://woodmastr:$HF_TOKEN@huggingface.co/spaces/woodmastr/imager
-          git fetch huggingface main
+          git remote set-url space https://woodmastr:$HF_TOKEN@huggingface.co/spaces/woodmastr/imager
+          git fetch space
 
       - name: Merge Hugging Face changes
         run: |
-          git merge huggingface/main --allow-unrelated-histories -X ours || true
-          git status
-
-      - name: Track binary files with Git LFS
-        run: |
-          git lfs track "*.png"
-          git add .gitattributes
-          git add "*.png"
-          git commit -m "Track binary files with Git LFS" || echo "No changes to commit"
-
-      - name: Push LFS objects to Hugging Face
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          git lfs push --all https://woodmastr:$HF_TOKEN@huggingface.co/spaces/woodmastr/imager main
-
-      - name: Push to Hugging Face
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          git push https://woodmastr:$HF_TOKEN@huggingface.co/spaces/woodmastr/imager main
+          git merge space/main --allow-unrelated-histories -X theirs
 
       - name: Push to GitHub
         run: git push origin main
